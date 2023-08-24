@@ -2,8 +2,8 @@
 
 namespace Code16\LaravelTiteliveClient\Api\Clients\TiteLive;
 
-use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Carbon\Carbon;
+use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Book;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -13,9 +13,13 @@ use Transliterator;
 class TiteLiveClient implements BookDirectoryClient
 {
     protected string $endpoint;
+
     protected string $clientNumber;
+
     protected string $login;
+
     protected string $password;
+
     protected array $params = [];
 
     public function __construct(string $endpoint, string $clientNumber, string $login, string $password)
@@ -28,7 +32,7 @@ class TiteLiveClient implements BookDirectoryClient
 
     public function setParam(string $param, $value): self
     {
-        if($label = $this->getLabelForParam($param)) {
+        if ($label = $this->getLabelForParam($param)) {
             $this->params[$label] = $this->normalizeValue($value, $param);
         }
 
@@ -41,7 +45,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['tri'] = '';
 
         return collect($this->requestApi('result'))
-            ->map(function($result) use($groupEditions) {
+            ->map(function ($result) use ($groupEditions) {
                 return $groupEditions
                     ? $this->makeOneBookFromTiteLiveResult($result)
                     : $this->makeAllEditionsFromTiteLiveResult($result);
@@ -64,7 +68,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['tri'] = '';
 
         return collect($this->requestApi('result'))
-            ->map(function($result) {
+            ->map(function ($result) {
                 return $this->makeOneBookFromTiteLiveResult($result);
             })
             ->filter();
@@ -76,7 +80,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['tri'] = '';
 
         return collect($this->requestApi('result'))
-            ->map(function($result) {
+            ->map(function ($result) {
                 return $this->makeAllEditionsFromTiteLiveResult($result);
             })
             ->flatten()
@@ -126,47 +130,47 @@ class TiteLiveClient implements BookDirectoryClient
         // This nonsense if brought to you by TiteLive
         $hash = md5(
             collect($this->params)
-                ->map(function($value, $name) {
+                ->map(function ($value, $name) {
                     return "{$name}={$value}&";
                 })
                 ->values()
                 ->implode('')
-            . md5($this->password)
+            .md5($this->password)
         );
 
-        return http_build_query($this->params) . "&hash={$hash}";
+        return http_build_query($this->params)."&hash={$hash}";
     }
 
     private function normalizeValue($value, string $param): string
     {
-        if($param === static::SEARCH_AVAILABILITY) {
+        if ($param === static::SEARCH_AVAILABILITY) {
             return $value === 'all' ? '0,1,2' : '1,2';
         }
 
-        if($param === static::SEARCH_QUERY) {
+        if ($param === static::SEARCH_QUERY) {
             // Remove accents and diacritics
             $value = Transliterator::create('NFD; [:Nonspacing Mark:] Remove; NFC')
                 ->transliterate($value);
 
-            return preg_replace( '/[\W]/', ' ', $value);
+            return preg_replace('/[\W]/', ' ', $value);
         }
 
-        if($param === static::CATEGORY_CODES) {
+        if ($param === static::CATEGORY_CODES) {
             return str_pad(trim($value), 8, '0', STR_PAD_RIGHT);
         }
 
-        return (string)$value;
+        return (string) $value;
     }
 
     private function makeOneBookFromTiteLiveResult(array $result): ?Book
     {
         $edition = collect($result['article'] ?? [])
-            ->when(isset($result['gencod']), function($query) use($result) {
+            ->when(isset($result['gencod']), function ($query) use ($result) {
                 return $query->where('gencod', $result['gencod']);
             })
             ->first();
 
-        if(!$edition) {
+        if (! $edition) {
             return null;
         }
 
@@ -176,17 +180,17 @@ class TiteLiveClient implements BookDirectoryClient
     private function makeAllEditionsFromTiteLiveResult(array $result): Collection
     {
         return collect($result['article'])
-            ->filter(function($edition) {
+            ->filter(function ($edition) {
                 return in_array($edition['codesupport'], ['T', 'P']);
             })
-            ->map(function($edition) use($result) {
+            ->map(function ($edition) use ($result) {
                 return $this->mapBookFromApiResult($result, $edition);
             });
     }
 
     private function mapBookFromApiResult(array $book, array $edition): ?Book
     {
-        if(!isset($edition['prix'])) {
+        if (! isset($edition['prix'])) {
             return null;
         }
 
@@ -204,7 +208,7 @@ class TiteLiveClient implements BookDirectoryClient
             'page_count' => $edition['pages'] ?? null,
             'readership' => $edition['lectorat'] ?? null,
             'editor' => $edition['editeur'] ?? null,
-            'price' => round($edition['prix']*100),
+            'price' => round($edition['prix'] * 100),
             'published_date' => isset($edition['dateparution'])
                 ? Carbon::createFromFormat('d/m/Y', $edition['dateparution'])
                 : null,
@@ -217,14 +221,14 @@ class TiteLiveClient implements BookDirectoryClient
             'availability' => $edition['dispo'] ?? 4,
             'stock' => $edition['stock'] ?? 0,
             'editions' => collect($book['article'] ?? [])
-                ->filter(function($otherEdition) use($edition) {
+                ->filter(function ($otherEdition) use ($edition) {
                     return in_array($otherEdition['codesupport'], ['T', 'P'])
                         && $otherEdition['gencod'] != $edition['gencod'];
                 })
                 ->pluck('gencod')
                 ->values()
                 ->toArray(),
-            'refreshed_at' => now()->toISOString()
+            'refreshed_at' => now()->toISOString(),
         ]);
     }
 }

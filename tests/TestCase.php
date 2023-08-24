@@ -2,9 +2,9 @@
 
 namespace Code16\LaravelTiteliveClient\Tests;
 
+use Code16\LaravelTiteliveClient\LaravelTiteliveClientServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Code16\LaravelTiteliveClient\LaravelTiteliveClientServiceProvider;
 
 class TestCase extends Orchestra
 {

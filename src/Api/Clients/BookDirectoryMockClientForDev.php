@@ -27,13 +27,13 @@ class BookDirectoryMockClientForDev implements BookDirectoryClient
 
     public function doFind(): ?Book
     {
-        if($this->params[static::GENCOD] === '404') {
+        if ($this->params[static::GENCOD] === '404') {
             return null;
         }
 
         return Book::factory([
             'id' => $this->params[static::GENCOD],
-            'category_codes' => Category::inRandomOrder()->limit(3)->get()->map->normalizedCode()
+            'category_codes' => Category::inRandomOrder()->limit(3)->get()->map->normalizedCode(),
         ])->make();
     }
 

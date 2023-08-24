@@ -8,9 +8,13 @@ use Illuminate\Support\Collection;
 class SearchBooks extends CacheableAction
 {
     protected bool $withUnavailable = true;
+
     protected bool $groupByEdition = true;
+
     protected string $query;
+
     protected int $page;
+
     protected int $count;
 
     public function withUnavailable(bool $withUnavailable = true): self

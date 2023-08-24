@@ -5,15 +5,15 @@ return [
         'id' => '1093278',
         'titre' => 'Harry Potter T.6 ; Harry Potter et le prince de sang-mêlé',
         'auteurs' => 'J. K. Rowling',
-        'auteurs_multi' => [132490 => 'J. K. Rowling',],
-        'auteurs_id' => ['132490',],
+        'auteurs_multi' => [132490 => 'J. K. Rowling'],
+        'auteurs_id' => ['132490'],
         'auteurs_fonction' => [],
         'realisateur_multi' => [],
         'article' => [
             [
                 'nombre' => 0,
                 'gencod' => '9782075105170',
-                'id_catalogue' => ['0',],
+                'id_catalogue' => ['0'],
                 'collection' => 'Ecoutez Lire Jeunesse',
                 'collection_no' => '0',
                 'editeur' => 'Gallimard-jeunesse',
@@ -21,14 +21,14 @@ return [
                 'distributeur' => 'Sodis',
                 'prix' => 27.4,
                 'prixpays' => [
-                    'fr' => ['value' => 27.4, 'devise' => '€',],
-                    'be' => ['value' => 27.4, 'devise' => '€',],
-                    'ch' => ['value' => 43.6, 'devise' => 'CHF',],
+                    'fr' => ['value' => 27.4, 'devise' => '€'],
+                    'be' => ['value' => 27.4, 'devise' => '€'],
+                    'ch' => ['value' => 43.6, 'devise' => 'CHF'],
                 ],
                 'dateparution' => '04/10/2018',
                 'dateparutionentier' => 1538604000,
                 'dispo' => 1,
-                'dispopays' => ['fr' => 1, 'be' => 1, 'ch' => 1,],
+                'dispopays' => ['fr' => 1, 'be' => 1, 'ch' => 1],
                 'libelledispo' => 'Disponible',
                 'resume' => 'Lu par Dominique Collignon-Maurin ',
                 'image' => '1',
@@ -87,9 +87,9 @@ return [
                 'nboccasions' => 0,
                 'gtl' => [
                     'first' => [
-                        1 => ['code' => '2000000', 'libelle' => 'Jeunesse',],
-                        2 => ['code' => '2040000', 'libelle' => 'Littérature Enfants',],
-                        3 => ['code' => '2040300', 'libelle' => 'Séries / Héros',],
+                        1 => ['code' => '2000000', 'libelle' => 'Jeunesse'],
+                        2 => ['code' => '2040000', 'libelle' => 'Littérature Enfants'],
+                        3 => ['code' => '2040300', 'libelle' => 'Séries / Héros'],
                     ],
                 ],
                 'gtlvideo' => [],
@@ -162,5 +162,5 @@ return [
         'biographies' => [],
         'websites' => [],
         'typeproduit' => 0,
-    ]
+    ],
 ];

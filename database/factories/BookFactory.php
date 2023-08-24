@@ -10,6 +10,7 @@ class BookFactory extends Factory
     protected $model = Book::class;
 
     private static int $VISUAL_INDEX = 0;
+
     private static array $VISUALS = [
         '229/9782070585229',
         '904/9782070624904',
@@ -106,7 +107,7 @@ class BookFactory extends Factory
                 [$this->faker->ean13, $this->faker->ean13, $this->faker->ean13, $this->faker->ean13],
                 $this->faker->numberBetween(0, 4)
             ),
-            'refreshed_at' => now()->subDays($this->faker->numberBetween(0, 30))->toISOString()
+            'refreshed_at' => now()->subDays($this->faker->numberBetween(0, 30))->toISOString(),
         ];
     }
 
@@ -118,7 +119,7 @@ class BookFactory extends Factory
             ['S' => 'v', 'M' => 'm', 'L' => '75'][$size] ?? '75'
         );
 
-        if(++self::$VISUAL_INDEX >= count(self::$VISUALS)) {
+        if (++self::$VISUAL_INDEX >= count(self::$VISUALS)) {
             self::$VISUAL_INDEX = 0;
         }
 
