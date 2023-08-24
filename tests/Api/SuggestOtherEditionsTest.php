@@ -12,7 +12,7 @@ beforeEach(function () {
 
 it('suggests other editions of a book', function () {
     $fakeClient = new BookDirectoryMockClientForDev();
-    $this->app->bind(BookDirectoryClient::class, fn() => $fakeClient);
+    $this->app->bind(BookDirectoryClient::class, fn () => $fakeClient);
 
     app(SuggestOtherEditions::class)->suggestBooks('How to make $$', ['bob marley', 'doc gyneco']);
 
@@ -25,7 +25,8 @@ it('suggests other editions of a book', function () {
 });
 
 it('can exclude a gencod from suggestions', function () {
-    $this->app->bind(BookDirectoryClient::class, fn() => new class extends BookDirectoryMockClientForDev {
+    $this->app->bind(BookDirectoryClient::class, fn () => new class extends BookDirectoryMockClientForDev
+    {
         public function doListEditions(): Collection
         {
             return collect([

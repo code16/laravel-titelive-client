@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 it('suggests books from authors', function () {
     $fakeClient = new BookDirectoryMockClientForDev();
-    $this->app->bind(BookDirectoryClient::class, fn() => $fakeClient);
+    $this->app->bind(BookDirectoryClient::class, fn () => $fakeClient);
 
     app(SuggestBooksFromAuthors::class)->suggestBooks(['bob marley', 'doc gyneco']);
 
@@ -20,7 +20,8 @@ it('suggests books from authors', function () {
 });
 
 it('can exclude a gencod from suggestions', function () {
-    $this->app->bind(BookDirectoryClient::class, fn() => new class extends BookDirectoryMockClientForDev {
+    $this->app->bind(BookDirectoryClient::class, fn () => new class extends BookDirectoryMockClientForDev
+    {
         public function doListForAuthors(): Collection
         {
             return collect([

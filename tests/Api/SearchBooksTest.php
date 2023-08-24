@@ -6,7 +6,7 @@ use Code16\LaravelTiteliveClient\Api\SearchBooks;
 
 beforeEach(function () {
     $this->fakeClient = new BookDirectoryMockClientForDev();
-    $this->app->bind(BookDirectoryClient::class, fn() => $this->fakeClient);
+    $this->app->bind(BookDirectoryClient::class, fn () => $this->fakeClient);
 });
 
 it('searches for books', function () {
