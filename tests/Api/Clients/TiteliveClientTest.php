@@ -8,8 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
-    $this->doSearchFixture = include __DIR__.'/fixtures/fixture_doSearch.php';
-    $this->doFindFixture = include __DIR__.'/fixtures/fixture_doFind.php';
+    $this->doSearchFixture = include __DIR__.'/../../fixtures/fixture_doSearch.php';
+    $this->doFindFixture = include __DIR__.'/../../fixtures/fixture_doFind.php';
 
     Http::fake([
         'find?*' => Http::response($this->doFindFixture),

@@ -24,9 +24,8 @@ abstract class CacheableAction
         return Cache::remember(
             $this->generateUniqueCacheKey(),
             now()->addMinutes(config('titelive-client.book_directory.cache_duration')),
-            function () {
-                return $this->execute();
-            });
+            fn () => $this->execute()
+        );
     }
 
     abstract protected function execute();
@@ -37,9 +36,7 @@ abstract class CacheableAction
             static::class
             .'-'
             .collect(get_object_vars($this))
-                ->map(function ($value) {
-                    return is_array($value) ? implode(',', $value) : (string) $value;
-                })
+                ->map(fn ($value) => is_array($value) ? implode(',', $value) : (string) $value)
                 ->implode('')
         );
     }

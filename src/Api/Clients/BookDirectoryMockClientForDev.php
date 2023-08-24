@@ -9,6 +9,11 @@ class BookDirectoryMockClientForDev implements BookDirectoryClient
 {
     private array $params = [];
 
+    public function getParams(): array
+    {
+        return $this->params;
+    }
+
     public function setParam(string $param, $value): BookDirectoryClient
     {
         $this->params[$param] = $value;
