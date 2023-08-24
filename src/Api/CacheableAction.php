@@ -17,13 +17,13 @@ abstract class CacheableAction
 
     protected function executeCacheable()
     {
-        if (! $this->withCache || ! config('laravel-titelive-client.book_directory.use_cache')) {
+        if (! $this->withCache || ! config('titelive-client.book_directory.use_cache')) {
             return $this->execute();
         }
 
         return Cache::remember(
             $this->generateUniqueCacheKey(),
-            now()->addMinutes(config('laravel-titelive-client.book_directory.cache_duration')),
+            now()->addMinutes(config('titelive-client.book_directory.cache_duration')),
             function () {
                 return $this->execute();
             });

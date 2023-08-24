@@ -23,7 +23,7 @@ class LaravelTiteliveClientServiceProvider extends PackageServiceProvider
     public function packageRegistered()
     {
         $this->app->bind(BookDirectoryClient::class, function ($app) {
-            if (config('laravel-titelive-client.book_directory.mock', false)) {
+            if (config('titelive-client.book_directory.mock', false)) {
                 return new BookDirectoryMockClientForDev();
             }
 
@@ -36,7 +36,7 @@ class LaravelTiteliveClientServiceProvider extends PackageServiceProvider
         });
 
         $this->app->bind(BookCache::class, function ($app) {
-            if (config('laravel-titelive-client.book_directory.mock', false)) {
+            if (config('titelive-client.book_directory.mock', false)) {
                 return new BookCacheMockForDev();
             }
 

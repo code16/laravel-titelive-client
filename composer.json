@@ -31,8 +31,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Code16\\LaravelTiteliveClient\\Tests\\": "tests/",
-            "Workbench\\App\\": "workbench/app/"
+            "Code16\\LaravelTiteliveClient\\Tests\\": "tests/"
         }
     },
     "scripts": {
@@ -62,10 +61,7 @@
         "laravel": {
             "providers": [
                 "Code16\\LaravelTiteliveClient\\LaravelTiteliveClientServiceProvider"
-            ],
-            "aliases": {
-                "LaravelTiteliveClient": "Code16\\LaravelTiteliveClient\\Facades\\LaravelTiteliveClient"
-            }
+            ]
         }
     },
     "minimum-stability": "dev",

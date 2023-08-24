@@ -33,7 +33,9 @@ class BookDirectoryMockClientForDev implements BookDirectoryClient
 
         return Book::factory([
             'id' => $this->params[static::GENCOD],
-            'category_codes' => Category::inRandomOrder()->limit(3)->get()->map->normalizedCode(),
+            'category_codes' => collect(range(0, 2))
+                ->map(fn () => str_pad(rand(1000, 9999), 8, '0'))
+                ->toArray(),
         ])->make();
     }
 

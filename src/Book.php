@@ -2,6 +2,7 @@
 
 namespace Code16\LaravelTiteliveClient;
 
+use Code16\LaravelTiteliveClient\Database\Factories\BookFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -33,6 +34,11 @@ class Book extends Model implements JsonSerializable
         'published_date' => 'date',
         'id' => 'string',
     ];
+
+    protected static function newFactory()
+    {
+        return new BookFactory();
+    }
 
     public function getUrlAttribute(): string
     {
