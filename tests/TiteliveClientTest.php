@@ -8,8 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 
 beforeEach(function () {
-    $this->doSearchFixture = include __DIR__ . '/fixtures/fixture_doSearch.php';
-    $this->doFindFixture = include __DIR__ . '/fixtures/fixture_doFind.php';
+    $this->doSearchFixture = include __DIR__.'/fixtures/fixture_doSearch.php';
+    $this->doFindFixture = include __DIR__.'/fixtures/fixture_doFind.php';
 
     Http::fake([
         'find?*' => Http::response($this->doFindFixture),
@@ -117,9 +117,9 @@ it('searches for books NOT grouped by edition', function () {
         ->doSearch();
 
     $editionCount = collect($this->doSearchFixture['result'])
-        ->sum(function($book) {
+        ->sum(function ($book) {
             return collect($book['article'])
-                ->filter(function($edition) {
+                ->filter(function ($edition) {
                     return in_array($edition['codesupport'], ['T', 'P']);
                 })
                 ->count();

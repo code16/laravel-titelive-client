@@ -8,8 +8,11 @@ use Illuminate\Support\Collection;
 class ListBooks extends CacheableAction
 {
     protected bool $withUnavailable = true;
+
     protected string $categoryCode;
+
     protected int $page;
+
     protected int $count;
 
     public function withUnavailable(bool $withUnavailable = true): self

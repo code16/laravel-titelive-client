@@ -17,7 +17,7 @@ class BookJsonResource extends JsonResource
                 'medium' => $this->visual('medium'),
                 'thumbnail' => $this->visual('thumbnail'),
             ],
-            'formatted_price' => sprintf('%s&nbsp;€', number_format($this->price/100, 2, ',', '')),
+            'formatted_price' => sprintf('%s&nbsp;€', number_format($this->price / 100, 2, ',', '')),
             'formatted_published_date' => $this->published_date
                 ? $this->published_date->isoFormat('Do MMMM YYYY')
                 : null,

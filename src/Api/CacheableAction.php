@@ -17,7 +17,7 @@ abstract class CacheableAction
 
     protected function executeCacheable()
     {
-        if(!$this->withCache || !config('laravel-titelive-client.book_directory.use_cache')) {
+        if (! $this->withCache || ! config('laravel-titelive-client.book_directory.use_cache')) {
             return $this->execute();
         }
 
@@ -29,16 +29,16 @@ abstract class CacheableAction
             });
     }
 
-    protected abstract function execute();
+    abstract protected function execute();
 
     private function generateUniqueCacheKey(): string
     {
         return md5(
             static::class
-            . '-'
-            . collect(get_object_vars($this))
-                ->map(function($value) {
-                    return is_array($value) ? implode(',', $value) : (string)$value;
+            .'-'
+            .collect(get_object_vars($this))
+                ->map(function ($value) {
+                    return is_array($value) ? implode(',', $value) : (string) $value;
                 })
                 ->implode('')
         );

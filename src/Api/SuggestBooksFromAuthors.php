@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 class SuggestBooksFromAuthors extends CacheableAction
 {
     protected array $authors;
+
     protected ?string $excludedGencod;
 
     public function suggestBooks(array $authors, string $excludedGencod = null): Collection
@@ -26,7 +27,7 @@ class SuggestBooksFromAuthors extends CacheableAction
             ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'available')
             ->setParam(BookDirectoryClient::LIST_FOR_AUTHORS, implode(' ', $this->authors))
             ->doListForAuthors()
-            ->when($this->excludedGencod, function($collection, $excludedGencod) {
+            ->when($this->excludedGencod, function ($collection, $excludedGencod) {
                 return $collection
                     ->filter(fn (Book $book) => $book->id != $excludedGencod);
             });
