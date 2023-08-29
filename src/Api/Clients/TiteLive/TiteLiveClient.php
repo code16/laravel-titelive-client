@@ -103,11 +103,12 @@ class TiteLiveClient implements BookDirectoryClient
 
     private function requestApi(string $jsonName): array
     {
-        $response = Http::withHeaders([
-            'User-Agent' => 'qdb/v1.0',
-            'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-            'Accept-Encoding' => 'gzip, deflate, br',
-        ])
+        $response = Http::retry(times: 5, sleepMilliseconds: 2000)
+            ->withHeaders([
+                'User-Agent' => 'qdb/v1.0',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                'Accept-Encoding' => 'gzip, deflate, br',
+            ])
             ->get($this->endpoint, $this->buildParamsForRequest())
             ->throw()
             ->json();
