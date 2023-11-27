@@ -181,7 +181,7 @@ class TiteLiveClient implements BookDirectoryClient
     {
         return collect($result['article'])
             ->filter(function ($edition) {
-                return in_array($edition['codesupport'] ?? [], ['T', 'P']);
+                return in_array($edition['codesupport'] ?? [], ['T', 'P', 'BL']);
             })
             ->map(function ($edition) use ($result) {
                 return $this->mapBookFromApiResult($result, $edition);
@@ -222,7 +222,7 @@ class TiteLiveClient implements BookDirectoryClient
             'stock' => $edition['stock'] ?? 0,
             'editions' => collect($book['article'] ?? [])
                 ->filter(function ($otherEdition) use ($edition) {
-                    return in_array($otherEdition['codesupport'] ?? [], ['T', 'P'])
+                    return in_array($otherEdition['codesupport'] ?? [], ['T', 'P', 'BL'])
                         && $otherEdition['gencod'] != $edition['gencod'];
                 })
                 ->pluck('gencod')
