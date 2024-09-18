@@ -3,6 +3,8 @@
 namespace Code16\LaravelTiteliveClient;
 
 use Code16\LaravelTiteliveClient\Database\Factories\BookFactory;
+use Code16\LaravelTiteliveClient\Enum\BookAvailability;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
@@ -12,71 +14,39 @@ class Book extends Model implements JsonSerializable
 {
     use HasFactory;
 
-    public static int $AVAILABLE_ON_DEMAND = 1; // Sur commande
-
-    public static int $FORTHCOMING = 2; // À paraître
-
-    public static int $REPRINT = 3; // En réimpression
-
-    public static int $UNAVAILABLE = 4; // Indisponible
-
-    public static int $COMMERCIAL_CHANGE = 5; // Changement de distributeur
-
-    public static int $OUT_OF_PRINT = 6; // Épuisé
-
-    public static int $MISSING = 7; // Manque sans date
-
-    public static int $TO_BE_PUBLISHED_AGAIN = 8; // À reparaître
-
     protected $guarded = [];
 
     protected $casts = [
-        'published_date' => 'date',
         'id' => 'string',
+        'published_date' => 'date',
+        'availability' => BookAvailability::class,
     ];
 
     protected static function newFactory()
     {
-        return new BookFactory();
+        return new BookFactory;
     }
 
-    public function getUrlAttribute(): string
+    protected function url(): Attribute
     {
-        return route('book.show', [
-            'id' => $this->id,
-            'slug' => Str::slug($this->title),
-        ]);
+        return Attribute::make(
+            get: fn () => route('book.show', [
+                'id' => $this->id,
+                'slug' => Str::slug($this->title),
+            ])
+        );
     }
 
-    public function getAvailabilityLabelAttribute(): ?string
+    protected function shortDetails(): Attribute
     {
-        if ($this->hasStock() && $this->availability != self::$FORTHCOMING) {
-            return null;
-        }
-
-        switch ($this->availability) {
-            case self::$AVAILABLE_ON_DEMAND:
-                return 'Sur commande';
-            case self::$FORTHCOMING:
-                return 'À paraître';
-            case self::$OUT_OF_PRINT:
-                return 'Épuisé';
-            case self::$REPRINT:
-            case self::$TO_BE_PUBLISHED_AGAIN:
-                return 'À reparaître';
-            default:
-                return 'Indisponible à la vente';
-        }
-    }
-
-    public function getShortDetailsAttribute(): string
-    {
-        return collect([
-            collect($this->authors)->join(', '),
-            $this->editor,
-        ])
-            ->filter()
-            ->join(' — ');
+        return Attribute::make(
+            get: fn () => collect([
+                collect($this->authors)->join(', '),
+                $this->editor,
+            ])
+                ->filter()
+                ->join(' — ')
+        );
     }
 
     public function hasStock(): bool
@@ -86,12 +56,12 @@ class Book extends Model implements JsonSerializable
 
     public function canBeOrdered(): bool
     {
-        if (config('maktaba.shopping_closed')) {
+        if (config('titelive-client.shopping_closed')) {
             return false;
         }
 
-        return $this->availability != self::$FORTHCOMING
-            && ($this->hasStock() || $this->availability == self::$AVAILABLE_ON_DEMAND);
+        return $this->availability != BookAvailability::Forthcoming
+            && ($this->hasStock() || $this->availability == BookAvailability::AvailableOnDemand);
     }
 
     public function visual(string $size): string

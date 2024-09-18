@@ -6,12 +6,10 @@ use Code16\LaravelTiteliveClient\Api\SuggestOtherEditions;
 use Code16\LaravelTiteliveClient\Book;
 use Illuminate\Support\Collection;
 
-beforeEach(function () {
-
-});
+beforeEach(function () {});
 
 it('suggests other editions of a book', function () {
-    $fakeClient = new BookDirectoryMockClientForDev();
+    $fakeClient = new BookDirectoryMockClientForDev;
     $this->app->bind(BookDirectoryClient::class, fn () => $fakeClient);
 
     app(SuggestOtherEditions::class)->suggestBooks('How to make $$', ['bob marley', 'doc gyneco']);

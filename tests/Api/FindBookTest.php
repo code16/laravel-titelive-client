@@ -5,7 +5,7 @@ use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryMockClientForDev;
 use Code16\LaravelTiteliveClient\Api\FindBook;
 
 beforeEach(function () {
-    $this->fakeClient = new BookDirectoryMockClientForDev();
+    $this->fakeClient = new BookDirectoryMockClientForDev;
     $this->app->bind(BookDirectoryClient::class, fn () => $this->fakeClient);
 });
 
