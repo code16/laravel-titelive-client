@@ -28,10 +28,10 @@ class LaravelTiteliveClientServiceProvider extends PackageServiceProvider
             }
 
             return new TiteLiveClient(
-                config('services.titelive.endpoint'),
-                config('services.titelive.client_number'),
-                config('services.titelive.login'),
-                config('services.titelive.password'),
+                config('titelive-client.api.endpoint'),
+                config('titelive-client.api.client_number'),
+                config('titelive-client.api.login'),
+                config('titelive-client.api.password'),
             );
         });
 
