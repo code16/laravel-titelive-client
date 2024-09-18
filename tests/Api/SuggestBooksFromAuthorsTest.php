@@ -7,7 +7,7 @@ use Code16\LaravelTiteliveClient\Book;
 use Illuminate\Support\Collection;
 
 it('suggests books from authors', function () {
-    $fakeClient = new BookDirectoryMockClientForDev();
+    $fakeClient = new BookDirectoryMockClientForDev;
     $this->app->bind(BookDirectoryClient::class, fn () => $fakeClient);
 
     app(SuggestBooksFromAuthors::class)->suggestBooks(['bob marley', 'doc gyneco']);

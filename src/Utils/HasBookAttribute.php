@@ -16,7 +16,7 @@ trait HasBookAttribute
         $this->update([
             'book' => app(BookCache::class)
                 ->force($force)
-                ->refreshIfNeeded($this->book)
+                ->refreshIfNeeded($this->book),
         ]);
 
         return $this;

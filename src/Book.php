@@ -24,7 +24,7 @@ class Book extends Model implements JsonSerializable
 
     protected static function newFactory()
     {
-        return new BookFactory();
+        return new BookFactory;
     }
 
     protected function url(): Attribute

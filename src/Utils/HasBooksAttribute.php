@@ -9,6 +9,7 @@ use Illuminate\Support\Collection;
 
 /**
  * @property Collection|Book[] $books
+ *
  * @mixin \Illuminate\Database\Eloquent\Model
  */
 trait HasBooksAttribute
@@ -17,14 +18,14 @@ trait HasBooksAttribute
     {
         $this->update([
             'books' => $this->books
-                ->map(function(Book $book) use($force) {
+                ->map(function (Book $book) use ($force) {
                     return app(BookCache::class)
                         ->force($force)
                         ->refreshIfNeeded($book);
                 })
                 ->filter()
                 ->values()
-                ->toArray()
+                ->toArray(),
         ]);
 
         return $this;

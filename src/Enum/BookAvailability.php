@@ -15,7 +15,7 @@ enum BookAvailability: int
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             BookAvailability::AvailableOnDemand => 'Sur commande',
             BookAvailability::Forthcoming => 'À paraître',
             BookAvailability::Reprint,

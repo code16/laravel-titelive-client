@@ -14,7 +14,7 @@ class SuggestOtherEditions extends CacheableAction
 
     protected ?string $excludedGencod;
 
-    public function suggestBooks(string $bookTitle, array $authors, string $excludedGencod = null): Collection
+    public function suggestBooks(string $bookTitle, array $authors, ?string $excludedGencod = null): Collection
     {
         $this->bookTitle = $bookTitle;
         $this->authors = $authors;
