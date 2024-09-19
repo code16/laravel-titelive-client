@@ -34,7 +34,7 @@ trait HasBooksAttribute
     public function books(): Attribute
     {
         return Attribute::make(
-            get: fn () => collect($this->fromJson($this->attributes['books'] ?? '{}'))
+            get: fn () => collect($this->fromJson($this->attributes['books'] ?? '[]'))
                 ->whereNotNull()
                 ->map(fn ($attributes) => new Book($attributes))
                 ->values()
