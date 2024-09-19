@@ -15,6 +15,7 @@
         "spatie/laravel-package-tools": "^1.14.0"
     },
     "require-dev": {
+        "laravel/framework": "^10.48",
         "laravel/pint": "^1.0",
         "nunomaduro/collision": "^7.8",
         "orchestra/testbench": "^8.8|^9.0",
