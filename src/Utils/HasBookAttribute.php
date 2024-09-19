@@ -26,7 +26,7 @@ trait HasBookAttribute
     {
         return Attribute::make(
             get: fn () => $this->attributes['book'] ?? null
-                ? new Book($this->fromJson($this->attributes['book'] ?? '{}'))
+                ? new Book($this->fromJson($this->attributes['book']))
                 : null
         );
     }
