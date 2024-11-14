@@ -7,7 +7,6 @@ return [
         'cache_duration' => env('TITELIVE_CLIENT_BOOK_DIRECTORY_CACHE_DURATION_IN_MINUTES', 60 * 24),
         'api' => [
             'login' => env('TITELIVE_LOGIN'),
-            'client_number' => env('TITELIVE_CLIENT_NUM'),
             'password' => env('TITELIVE_PWD'),
             'endpoint' => env('TITELIVE_ENDPOINT', 'https://catsearch.epagine.fr/v1/'),
             'login_endpoint' => env('TITELIVE_LOGIN_ENDPOINT', 'https://login.epagine.fr/v1/'),

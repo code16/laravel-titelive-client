@@ -43,6 +43,15 @@ class TiteLiveClient implements BookDirectoryClient
         return $this;
     }
 
+    public function getParam(string $param): mixed
+    {
+        if ($label = $this->getLabelForParam($param)) {
+            return $this->params[$label];
+        }
+
+        return $this->$param ?? null;
+    }
+
     public function doSearch(bool $groupEditions = false): Collection
     {
         $this->params['detail'] = 0;
@@ -61,10 +70,18 @@ class TiteLiveClient implements BookDirectoryClient
 
     public function doFind(): ?Book
     {
-        $this->params['detail'] = 1;
-        $gencod = $this->params[static::GENCOD] ?? null;
+        if (isset($this->params[$this->getLabelForParam(static::GENCOD)]))
+        {
+            $this->params['detail'] = 1;
+            $gencod = $this->getParam(static::GENCOD);
+            // For this endpoint, The gencode is passed to TiteLive in the endpoint,
+            // so it must not be sent as a parameter of the request
+            unset($this->params[$this->getLabelForParam(static::GENCOD)]);
 
-        return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
+            return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
+        }
+
+       throw new TiteLiveApiException("Missing gencod parameter");
     }
 
     public function doListForAuthors(): Collection
