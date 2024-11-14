@@ -15,7 +15,7 @@ beforeEach(function () {
         'find.example/*' => Http::response($this->doFindFixture),
         'list.example/*' => Http::response($this->doSearchFixture),
         'search.example/*' => Http::response($this->doSearchFixture),
-        'login.example/*' => Http::response(['token' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWQiOjgwMSwiaWF0IjoxNTE2MjM5MDIyfQ.KLNk_-7Dq8g9nUz_WRQr72Bc0iz9xMXJ165r82A83v4'],200, ['Set-Cookie' => "refresh-token=123456789; domain=."]),
+        'login.example/*' => Http::response(['token' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWQiOjgwMSwiaWF0IjoxNTE2MjM5MDIyfQ.KLNk_-7Dq8g9nUz_WRQr72Bc0iz9xMXJ165r82A83v4'], 200, ['Set-Cookie' => 'refresh-token=123456789; domain=.']),
     ]);
 
     $this->withoutExceptionHandling();
@@ -142,7 +142,7 @@ it('removes diacritics and accents from the search query', function () {
         ->doSearch();
 
     Http::assertSent(function (Request $request) {
-        if(str_contains($request->url(), 'search.example')) {
+        if (str_contains($request->url(), 'search.example')) {
             return $request['mots'] == 'aece o ui oui';
         } else {
             return str_contains($request->url(), 'login.example');
