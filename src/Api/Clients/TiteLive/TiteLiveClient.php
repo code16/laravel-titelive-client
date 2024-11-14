@@ -17,9 +17,13 @@ use Transliterator;
 class TiteLiveClient implements BookDirectoryClient
 {
     protected string $endpoint;
+
     protected string $login_endpoint;
+
     protected string $login;
+
     protected string $password;
+
     protected array $params = [];
 
     public function __construct(string $endpoint, string $login_endpoint, string $login, string $password)
@@ -102,9 +106,9 @@ class TiteLiveClient implements BookDirectoryClient
         ][$param] ?? null;
     }
 
-    private function requestApi(string $endpoint, $retries=0): array
+    private function requestApi(string $endpoint, $retries = 0): array
     {
-        try{
+        try {
             $response = Http::retry(
                 times: config('titelive-client.book_directory.api.retry.times'),
                 sleepMilliseconds: config('titelive-client.book_directory.api.retry.sleep_milliseconds'),
@@ -120,22 +124,20 @@ class TiteLiveClient implements BookDirectoryClient
         } catch (\Exception $e) {
             report($e);
 
-            if($e instanceof RequestException)
-            {
+            if ($e instanceof RequestException) {
                 Log::error($e->response->getBody());
                 $error = $e?->response->json();
                 throw new TiteLiveApiException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
             }
 
-            if($e instanceof TiteLiveApiCredentialsException)
-            {
+            if ($e instanceof TiteLiveApiCredentialsException) {
                 // starts by invalidating the token, then retry full login process
                 match (true) {
                     $retries == 0 => Cache::forget('titelive_auth_token'),
                     $retries > 0 => Cache::forget('titelive_refresh_cookie'),
                 };
 
-                if($retries < 2) {
+                if ($retries < 2) {
                     return $this->requestApi($endpoint, $retries + 1);
                 }
             }
@@ -154,24 +156,25 @@ class TiteLiveClient implements BookDirectoryClient
         return '?'.http_build_query($this->params);
     }
 
-    private function buildEndpointUrl(string $endpoint, string $customBase = null, string $query = null): string
+    private function buildEndpointUrl(string $endpoint, ?string $customBase = null, ?string $query = null): string
     {
         $base = str_ends_with($customBase ?? $this->endpoint, '/') ? ($customBase ?? $this->endpoint) : ($customBase ?? $this->endpoint).'/';
         $endpoint = str_starts_with($endpoint, '/') ? substr($endpoint, 1) : $endpoint;
+
         return $base.$endpoint.$query;
     }
 
     private function login(): array
     {
-        try{
+        try {
             return Cache::remember('titelive_refresh_cookie', 60 * 60 * 24, function () {
                 $res = Http::throw()->asJson()->post($this->buildEndpointUrl('login/'.$this->login.'/token', $this->login_endpoint), [
                     'password' => $this->password,
                 ]);
 
                 return [
-                    'cookie' => $res->cookies()->getCookieByName("refresh-token") ?? '',
-                    'token' => json_decode(base64_decode(str_replace('_', '/', str_replace('-','+',explode('.', $res->json('token') ?? '{}')[1]))))
+                    'cookie' => $res->cookies()->getCookieByName('refresh-token') ?? '',
+                    'token' => json_decode(base64_decode(str_replace('_', '/', str_replace('-', '+', explode('.', $res->json('token') ?? '{}')[1])))),
                 ];
             });
         } catch (\Exception $e) {
@@ -182,7 +185,7 @@ class TiteLiveClient implements BookDirectoryClient
 
     private function getAuthToken(): string
     {
-        try{
+        try {
             $params = $this->login();
 
             return Cache::remember('titelive_auth_token', 60 * 4, function () use ($params) {
@@ -197,8 +200,7 @@ class TiteLiveClient implements BookDirectoryClient
             });
         } catch (\Exception $e) {
             report($e);
-            if($e instanceof RequestException)
-            {
+            if ($e instanceof RequestException) {
                 Log::error($e->response?->getBody());
             }
             throw new TiteLiveApiCredentialsException('Could not get auth token');
