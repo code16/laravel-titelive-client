@@ -44,7 +44,6 @@ class BookDirectoryMockClientForDev implements BookDirectoryClient
         ])->make();
     }
 
-
     public function doListForAuthors(): Collection
     {
         return collect(
