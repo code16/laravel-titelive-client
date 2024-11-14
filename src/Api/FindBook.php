@@ -9,6 +9,7 @@ class FindBook
     public function find(string $gencod)
     {
         return app(BookDirectoryClient::class)
-            ->findBook($gencod);
+            ->setParam(BookDirectoryClient::GENCOD, $gencod)
+            ->doFind();
     }
 }

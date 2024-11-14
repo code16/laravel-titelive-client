@@ -30,7 +30,7 @@ class BookDirectoryMockClientForDev implements BookDirectoryClient
         );
     }
 
-    public function findBook(string $gencod): ?Book
+    public function doFind(): ?Book
     {
         if ($this->params[static::GENCOD] === '404') {
             return null;

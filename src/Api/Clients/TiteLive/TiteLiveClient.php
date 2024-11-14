@@ -55,9 +55,10 @@ class TiteLiveClient implements BookDirectoryClient
             ->filter();
     }
 
-    public function findBook(string $gencod): ?Book
+    public function doFind(): ?Book
     {
         $this->params['detail'] = 1;
+        $gencod = $this->params[static::GENCOD] ?? null;
 
         return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
     }
