@@ -29,5 +29,5 @@ interface BookDirectoryClient
 
     public function doListEditions(): Collection;
 
-    public function doFind(): ?Book;
+    public function findBook(string $gencod): ?Book;
 }
