@@ -81,7 +81,7 @@ class TiteLiveClient implements BookDirectoryClient
             return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
         }
 
-       throw new TiteLiveBookNotFoundException("Missing gencod parameter");
+        throw new TiteLiveBookNotFoundException('Missing gencod parameter');
     }
 
     public function doListForAuthors(): Collection
