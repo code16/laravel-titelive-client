@@ -81,7 +81,7 @@ class TiteLiveClient implements BookDirectoryClient
             return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
         }
 
-       throw new TiteLiveApiException("Missing gencod parameter");
+       throw new TiteLiveBookNotFoundException("Missing gencod parameter");
     }
 
     public function doListForAuthors(): Collection
@@ -144,7 +144,10 @@ class TiteLiveClient implements BookDirectoryClient
             if ($e instanceof RequestException) {
                 Log::error($e->response->getBody());
                 $error = $e?->response->json();
-                throw new TiteLiveApiException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
+                if ($error['type'] === "urn:epagine:GEN-404") {
+                    throw new TiteLiveBookNotFoundException($error['ean'] ?? '');
+                }
+                throw new TiteLiveBookNotFoundException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
             }
 
             if ($e instanceof TiteLiveApiCredentialsException) {
@@ -159,7 +162,7 @@ class TiteLiveClient implements BookDirectoryClient
                 }
             }
 
-            throw new TiteLiveApiException('Unable to fetch data from titelive apis');
+            throw new TiteLiveBookNotFoundException('Unable to fetch data from titelive apis');
         }
 
         return $response->json() ?? [];
