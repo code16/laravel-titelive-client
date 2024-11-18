@@ -70,8 +70,7 @@ class TiteLiveClient implements BookDirectoryClient
 
     public function doFind(): ?Book
     {
-        if (isset($this->params[$this->getLabelForParam(static::GENCOD)]))
-        {
+        if (isset($this->params[$this->getLabelForParam(static::GENCOD)])) {
             $this->params['detail'] = 1;
             $gencod = $this->getParam(static::GENCOD);
             // For this endpoint, The gencode is passed to TiteLive in the endpoint,
@@ -144,7 +143,7 @@ class TiteLiveClient implements BookDirectoryClient
             if ($e instanceof RequestException) {
                 Log::error($e->response->getBody());
                 $error = $e?->response->json();
-                if ($error['type'] === "urn:epagine:GEN-404") {
+                if ($error['type'] === 'urn:epagine:GEN-404') {
                     throw new TiteLiveBookNotFoundException($error['ean'] ?? '');
                 }
                 throw new TiteLiveBookNotFoundException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
