@@ -3,6 +3,7 @@
 namespace Code16\LaravelTiteliveClient\Utils;
 
 use Code16\LaravelTiteliveClient\Api\Clients\BookCache;
+use Code16\LaravelTiteliveClient\Api\Clients\TiteLive\TiteLiveBookNotFoundException;
 use Code16\LaravelTiteliveClient\Book;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
@@ -19,9 +20,14 @@ trait HasBooksAttribute
         $this->update([
             'books' => $this->books
                 ->map(function (Book $book) use ($force) {
-                    return app(BookCache::class)
-                        ->force($force)
-                        ->refreshIfNeeded($book);
+                    try {
+                        $refreshedBook = app(BookCache::class)
+                            ->force($force)
+                            ->refreshIfNeeded($book);
+                    } catch(TiteLiveBookNotFoundException $e) {
+                        return null;
+                    }
+                    return $refreshedBook;
                 })
                 ->filter()
                 ->values()
