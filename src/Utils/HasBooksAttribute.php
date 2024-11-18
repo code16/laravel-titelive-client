@@ -24,9 +24,10 @@ trait HasBooksAttribute
                         $refreshedBook = app(BookCache::class)
                             ->force($force)
                             ->refreshIfNeeded($book);
-                    } catch(TiteLiveBookNotFoundException $e) {
+                    } catch (TiteLiveBookNotFoundException $e) {
                         return null;
                     }
+
                     return $refreshedBook;
                 })
                 ->filter()
