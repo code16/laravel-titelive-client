@@ -2,19 +2,23 @@
 
 namespace Code16\LaravelTiteliveClient\Api\Clients\TiteLive;
 
+use Cache;
 use Carbon\Carbon;
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Book;
+use GuzzleHttp\Cookie\SetCookie;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Transliterator;
 
 class TiteLiveClient implements BookDirectoryClient
 {
     protected string $endpoint;
 
-    protected string $clientNumber;
+    protected string $login_endpoint;
 
     protected string $login;
 
@@ -22,10 +26,10 @@ class TiteLiveClient implements BookDirectoryClient
 
     protected array $params = [];
 
-    public function __construct(string $endpoint, string $clientNumber, string $login, string $password)
+    public function __construct(string $endpoint, string $login_endpoint, string $login, string $password)
     {
         $this->endpoint = $endpoint;
-        $this->clientNumber = $clientNumber;
+        $this->login_endpoint = $login_endpoint;
         $this->login = $login;
         $this->password = $password;
     }
@@ -39,12 +43,21 @@ class TiteLiveClient implements BookDirectoryClient
         return $this;
     }
 
+    public function getParam(string $param): mixed
+    {
+        if ($label = $this->getLabelForParam($param)) {
+            return $this->params[$label];
+        }
+
+        return $this->$param ?? null;
+    }
+
     public function doSearch(bool $groupEditions = false): Collection
     {
         $this->params['detail'] = 0;
         $this->params['tri'] = '';
 
-        return collect($this->requestApi('result'))
+        return collect($this->requestApi('search')['result'] ?? [])
             ->map(function ($result) use ($groupEditions) {
                 return $groupEditions
                     ? $this->makeOneBookFromTiteLiveResult($result)
@@ -57,9 +70,17 @@ class TiteLiveClient implements BookDirectoryClient
 
     public function doFind(): ?Book
     {
-        $this->params['detail'] = 1;
+        if (isset($this->params[$this->getLabelForParam(static::GENCOD)])) {
+            $this->params['detail'] = 1;
+            $gencod = $this->getParam(static::GENCOD);
+            // For this endpoint, The gencode is passed to TiteLive in the endpoint,
+            // so it must not be sent as a parameter of the request
+            unset($this->params[$this->getLabelForParam(static::GENCOD)]);
 
-        return $this->makeOneBookFromTiteLiveResult($this->requestApi('oeuvre'));
+            return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
+        }
+
+        throw new TiteLiveBookNotFoundException('Missing gencod parameter');
     }
 
     public function doListForAuthors(): Collection
@@ -67,7 +88,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['detail'] = 0;
         $this->params['tri'] = '';
 
-        return collect($this->requestApi('result'))
+        return collect($this->requestApi('search')['result'])
             ->map(function ($result) {
                 return $this->makeOneBookFromTiteLiveResult($result);
             })
@@ -79,7 +100,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['detail'] = 0;
         $this->params['tri'] = '';
 
-        return collect($this->requestApi('result'))
+        return collect($this->requestApi('search')['result'])
             ->map(function ($result) {
                 return $this->makeAllEditionsFromTiteLiveResult($result);
             })
@@ -101,48 +122,108 @@ class TiteLiveClient implements BookDirectoryClient
         ][$param] ?? null;
     }
 
-    private function requestApi(string $jsonName): array
+    private function requestApi(string $endpoint, $retries = 0): array
     {
-        $response = Http::retry(
-            times: config('titelive-client.book_directory.api.retry.times'),
-            sleepMilliseconds: config('titelive-client.book_directory.api.retry.sleep_milliseconds'),
-        )
-            ->withHeaders([
-                'User-Agent' => 'qdb/v1.0',
-                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                'Accept-Encoding' => 'gzip, deflate, br',
-            ])
-            ->get($this->endpoint, $this->buildParamsForRequest())
-            ->throw()
-            ->json();
+        try {
+            $response = Http::retry(
+                times: config('titelive-client.book_directory.api.retry.times'),
+                sleepMilliseconds: config('titelive-client.book_directory.api.retry.sleep_milliseconds'),
+            )
+                ->withHeaders([
+                    'User-Agent' => 'qdb/v1.0',
+                    'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                    'Accept-Encoding' => 'gzip, deflate, br',
+                ])
+                ->withToken($this->getAuthToken())
+                ->get($this->buildEndpointUrl($endpoint, null, $this->buildParamsForRequest()))
+                ->throw();
+        } catch (\Exception $e) {
+            report($e);
 
-        if (isset($response['Error'])) {
-            throw new TiteLiveApiException($response['Error']);
+            if ($e instanceof RequestException) {
+                Log::error($e->response->getBody());
+                $error = $e?->response->json();
+                if ($error['type'] === 'urn:epagine:GEN-404') {
+                    throw new TiteLiveBookNotFoundException($error['ean'] ?? '');
+                }
+                throw new TiteLiveBookNotFoundException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
+            }
+
+            if ($e instanceof TiteLiveApiCredentialsException) {
+                // starts by invalidating the token, then retry full login process
+                match (true) {
+                    $retries == 0 => Cache::forget('titelive_auth_token'),
+                    $retries > 0 => Cache::forget('titelive_refresh_cookie'),
+                };
+
+                if ($retries < 2) {
+                    return $this->requestApi($endpoint, $retries + 1);
+                }
+            }
+
+            throw new TiteLiveBookNotFoundException('Unable to fetch data from titelive apis');
         }
 
-        return $response[$jsonName] ?? [];
+        return $response->json() ?? [];
     }
 
     private function buildParamsForRequest(): string
     {
-        $this->params['mid'] = $this->clientNumber;
-        $this->params['login'] = $this->login;
         $this->params['stocks'] = 1;
         $this->params['base'] = 'paper';
-        ksort($this->params);
 
-        // This nonsense if brought to you by TiteLive
-        $hash = md5(
-            collect($this->params)
-                ->map(function ($value, $name) {
-                    return "{$name}={$value}&";
-                })
-                ->values()
-                ->implode('')
-            .md5($this->password)
-        );
+        return '?'.http_build_query($this->params);
+    }
 
-        return http_build_query($this->params)."&hash={$hash}";
+    private function buildEndpointUrl(string $endpoint, ?string $customBase = null, ?string $query = null): string
+    {
+        $base = str_ends_with($customBase ?? $this->endpoint, '/') ? ($customBase ?? $this->endpoint) : ($customBase ?? $this->endpoint).'/';
+        $endpoint = str_starts_with($endpoint, '/') ? substr($endpoint, 1) : $endpoint;
+
+        return $base.$endpoint.$query;
+    }
+
+    private function login(): array
+    {
+        try {
+            return Cache::remember('titelive_refresh_cookie', 60 * 60 * 24, function () {
+                $res = Http::throw()->asJson()->post($this->buildEndpointUrl('login/'.$this->login.'/token', $this->login_endpoint), [
+                    'password' => $this->password,
+                ]);
+
+                return [
+                    'cookie' => $res->cookies()->getCookieByName('refresh-token') ?? '',
+                    'token' => json_decode(base64_decode(str_replace('_', '/', str_replace('-', '+', explode('.', $res->json('token') ?? '{}')[1])))),
+                ];
+            });
+        } catch (\Exception $e) {
+            report($e);
+            throw new TiteLiveApiCredentialsException('Could not login to titelive apis');
+        }
+    }
+
+    private function getAuthToken(): string
+    {
+        try {
+            $params = $this->login();
+
+            return Cache::remember('titelive_auth_token', 60 * 4, function () use ($params) {
+                /** @var SetCookie $cookie */
+                $cookie = $params['cookie'];
+
+                $res = Http::throw()->asJson()->withCookies([
+                    'refresh-token' => $cookie?->getValue(),
+                ], $cookie?->getDomain())->get($this->buildEndpointUrl('login/'.$params['token']?->id.'/connexion/refresh', $this->login_endpoint));
+
+                return $res->json('token');
+            });
+        } catch (\Exception $e) {
+            report($e);
+            if ($e instanceof RequestException) {
+                Log::error($e->response?->getBody());
+            }
+            throw new TiteLiveApiCredentialsException('Could not get auth token');
+        }
     }
 
     private function normalizeValue($value, string $param): string
