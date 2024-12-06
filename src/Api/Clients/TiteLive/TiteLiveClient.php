@@ -172,6 +172,9 @@ class TiteLiveClient implements BookDirectoryClient
             ->when(isset($result['gencod']), function ($query) use ($result) {
                 return $query->where('gencod', $result['gencod']);
             })
+            ->filter(function ($edition) {
+                return in_array($edition['codesupport'] ?? [], ['T', 'P', 'BL']);
+            })
             ->first();
 
         if (! $edition) {
