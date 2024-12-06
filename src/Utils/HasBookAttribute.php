@@ -20,7 +20,7 @@ trait HasBookAttribute
                     ->force($force)
                     ->refreshIfNeeded($this->book),
             ]);
-        } catch(TiteLiveBookNotFoundException $e) {
+        } catch (TiteLiveBookNotFoundException $e) {
             $this->delete();
         }
 
