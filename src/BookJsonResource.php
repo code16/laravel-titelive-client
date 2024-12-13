@@ -2,6 +2,7 @@
 
 namespace Code16\LaravelTiteliveClient;
 
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**

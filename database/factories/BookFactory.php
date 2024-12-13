@@ -2,13 +2,11 @@
 
 namespace Code16\LaravelTiteliveClient\Database\Factories;
 
-use Code16\LaravelTiteliveClient\Book;
+
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
 {
-    protected $model = Book::class;
-
     private static int $VISUAL_INDEX = 0;
 
     private static array $VISUALS = [
@@ -74,6 +72,11 @@ class BookFactory extends Factory
         '708/9782846667708',
         '613/9782075150613',
     ];
+
+    public function modelName()
+    {
+        return config('titelive-client.book_model_class');
+    }
 
     public function definition()
     {

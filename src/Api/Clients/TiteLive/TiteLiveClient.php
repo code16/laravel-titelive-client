@@ -5,7 +5,8 @@ namespace Code16\LaravelTiteliveClient\Api\Clients\TiteLive;
 use Cache;
 use Carbon\Carbon;
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Concerns\UsesBookModel;
+use Code16\LaravelTiteliveClient\Models\Book;
 use GuzzleHttp\Cookie\SetCookie;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Arr;
@@ -16,6 +17,8 @@ use Transliterator;
 
 class TiteLiveClient implements BookDirectoryClient
 {
+    use UsesBookModel;
+
     protected string $endpoint;
 
     protected string $login_endpoint;
@@ -282,7 +285,7 @@ class TiteLiveClient implements BookDirectoryClient
             return null;
         }
 
-        return new Book([
+        return static::bookModelClass()::make([
             'id' => $edition['gencod'],
             'title' => $book['titre'],
             'description' => $edition['resume'] ?? null,

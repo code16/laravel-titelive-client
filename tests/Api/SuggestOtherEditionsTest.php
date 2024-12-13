@@ -3,7 +3,7 @@
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryMockClientForDev;
 use Code16\LaravelTiteliveClient\Api\SuggestOtherEditions;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 beforeEach(function () {});

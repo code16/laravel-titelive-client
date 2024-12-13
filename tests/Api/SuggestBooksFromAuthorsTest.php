@@ -3,7 +3,7 @@
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryMockClientForDev;
 use Code16\LaravelTiteliveClient\Api\SuggestBooksFromAuthors;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 it('suggests books from authors', function () {

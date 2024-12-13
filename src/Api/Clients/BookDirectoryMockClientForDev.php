@@ -2,11 +2,14 @@
 
 namespace Code16\LaravelTiteliveClient\Api\Clients;
 
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Concerns\UsesBookModel;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 class BookDirectoryMockClientForDev implements BookDirectoryClient
 {
+    use UsesBookModel;
+
     private array $params = [];
 
     public function getParams(): array

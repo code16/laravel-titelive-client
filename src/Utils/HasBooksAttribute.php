@@ -4,7 +4,8 @@ namespace Code16\LaravelTiteliveClient\Utils;
 
 use Code16\LaravelTiteliveClient\Api\Clients\BookCache;
 use Code16\LaravelTiteliveClient\Api\Clients\TiteLive\TiteLiveBookNotFoundException;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Concerns\UsesBookModel;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
 
@@ -15,6 +16,8 @@ use Illuminate\Support\Collection;
  */
 trait HasBooksAttribute
 {
+    use UsesBookModel;
+
     public function refreshBooks(bool $force = false): self
     {
         $this->update([
@@ -43,7 +46,7 @@ trait HasBooksAttribute
         return Attribute::make(
             get: fn () => collect($this->fromJson($this->attributes['books'] ?? '[]'))
                 ->whereNotNull()
-                ->map(fn ($attributes) => new Book($attributes))
+                ->map(fn ($attributes) => static::bookModelClass()::make($attributes))
                 ->values()
         );
     }

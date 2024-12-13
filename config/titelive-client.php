@@ -16,4 +16,5 @@ return [
             ],
         ],
     ],
+    'book_model_class' => \Code16\LaravelTiteliveClient\Models\Book::class,
 ];

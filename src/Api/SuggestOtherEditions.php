@@ -3,7 +3,7 @@
 namespace Code16\LaravelTiteliveClient\Api;
 
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 class SuggestOtherEditions extends CacheableAction
