@@ -1,7 +1,7 @@
 <?php
 /** @noinspection all */
 
-namespace Code16\LaravelTiteliveClient {
+namespace Code16\LaravelTiteliveClient\Models {
 
     use Carbon\Carbon;
     use Code16\LaravelTiteliveClient\Enum\BookAvailability;
