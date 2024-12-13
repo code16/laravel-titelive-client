@@ -2,7 +2,6 @@
 
 namespace Code16\LaravelTiteliveClient\Database\Factories;
 
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory

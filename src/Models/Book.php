@@ -1,4 +1,5 @@
 <?php
+
 /** @noinspection LaravelUnknownEloquentFactoryInspection */
 
 namespace Code16\LaravelTiteliveClient\Models;
