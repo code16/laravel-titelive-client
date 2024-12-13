@@ -64,11 +64,13 @@ class Book extends Model implements JsonSerializable
             && ($this->hasStock() || $this->availability == BookAvailability::AvailableOnDemand);
     }
 
-    public function getAvailabilityLabelAttribute(): ?string
+    public function availabilityLabel(): Attribute
     {
-        return $this->hasStock() && $this->availability != BookAvailability::Forthcoming
-            ? null
-            : $this->availability->getLabel();
+        return Attribute::make(
+            get: fn () => $this->hasStock() && $this->availability != BookAvailability::Forthcoming
+                ? null
+                : $this->availability->getLabel()
+        );
     }
 
     public function visual(string $size): string
@@ -80,6 +82,15 @@ class Book extends Model implements JsonSerializable
         }
 
         return $url;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            ...$this->toArray(),
+            'availability_label' => $this->availability_label,
+            'url' => $this->url,
+        ];
     }
 
     public function resolveRouteBinding($value, $field = null)
