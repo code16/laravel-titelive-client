@@ -64,12 +64,12 @@ class Book extends Model implements JsonSerializable
             && ($this->hasStock() || $this->availability == BookAvailability::AvailableOnDemand);
     }
 
-    public function visual(string $size): string
+    public function visual(string $size, ?string $placeholder = null): ?string
     {
-        $url = $this->visuals[$size];
+        $url = $this->visuals[$size] ?? null;
 
         if (preg_match('/no_image\.png/', $url)) {
-            return asset('/img/book-placeholder.png');
+            return $placeholder ?? config('titelive-client.book_visual_placeholder_url');
         }
 
         return $url;
