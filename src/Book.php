@@ -22,6 +22,8 @@ class Book extends Model implements JsonSerializable
         'availability' => BookAvailability::class,
     ];
 
+    protected static ?string $fallbackVisualUrl = null;
+
     protected static function newFactory()
     {
         return new BookFactory;
@@ -64,15 +66,20 @@ class Book extends Model implements JsonSerializable
             && ($this->hasStock() || $this->availability == BookAvailability::AvailableOnDemand);
     }
 
-    public function visual(string $size, ?string $placeholder = null): ?string
+    public function visual(string $size, ?string $fallbackUrl = null): ?string
     {
         $url = $this->visuals[$size] ?? null;
 
         if (preg_match('/no_image\.png/', $url)) {
-            return $placeholder ?? config('titelive-client.book_visual_placeholder_url');
+            return $fallbackUrl ?: static::$fallbackVisualUrl ?: asset('/img/book-placeholder.png');
         }
 
         return $url;
+    }
+
+    public static function setFallbackVisualUrl(string $url): void
+    {
+        static::$fallbackVisualUrl = $url;
     }
 
     public function jsonSerialize(): array

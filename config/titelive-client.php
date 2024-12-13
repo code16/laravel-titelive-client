@@ -16,5 +16,4 @@ return [
             ],
         ],
     ],
-    'book_visual_placeholder_url' => asset('/img/book-placeholder.png'),
 ];
