@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
 {
-    private static int $VISUAL_INDEX = 0;
-
     private static array $VISUALS = [
         '229/9782070585229',
         '904/9782070624904',
@@ -115,16 +113,10 @@ class BookFactory extends Factory
 
     private function getVisual(string $size = 'L'): string
     {
-        $visual = sprintf(
+        return sprintf(
             'https://images.epagine.fr/%s_1_%s.jpg',
-            self::$VISUALS[self::$VISUAL_INDEX],
+            self::$VISUALS[array_rand(self::$VISUALS)],
             ['S' => 'v', 'M' => 'm', 'L' => '75'][$size] ?? '75'
         );
-
-        if (++self::$VISUAL_INDEX >= count(self::$VISUALS)) {
-            self::$VISUAL_INDEX = 0;
-        }
-
-        return $visual;
     }
 }
