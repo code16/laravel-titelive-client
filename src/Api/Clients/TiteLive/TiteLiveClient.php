@@ -141,8 +141,6 @@ class TiteLiveClient implements BookDirectoryClient
                 ->get($this->buildEndpointUrl($endpoint, null, $this->buildParamsForRequest()))
                 ->throw();
         } catch (\Exception $e) {
-            report($e);
-
             if ($e instanceof RequestException) {
                 Log::error($e->response->getBody());
                 $error = $e?->response->json();
@@ -164,6 +162,7 @@ class TiteLiveClient implements BookDirectoryClient
                 }
             }
 
+            report($e);
             throw new TiteLiveBookNotFoundException('Unable to fetch data from titelive apis');
         }
 
