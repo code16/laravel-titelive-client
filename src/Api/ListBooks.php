@@ -36,7 +36,7 @@ class ListBooks extends CacheableAction
         return app(BookDirectoryClient::class)
             ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, $this->withUnavailable ? 'all' : 'available')
             ->setParam(BookDirectoryClient::SEARCH_PAGE, $this->page)
-            ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, $this->count + 1) // add one because these dumb*ss at Titelive count from one I guess ?
+            ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, $this->count)
             ->setParam(BookDirectoryClient::CATEGORY_CODES, $this->categoryCode)
             ->doSearch(groupEditions: true);
     }
