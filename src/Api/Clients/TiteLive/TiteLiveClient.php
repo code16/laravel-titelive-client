@@ -199,7 +199,6 @@ class TiteLiveClient implements BookDirectoryClient
                 ];
             });
         } catch (\Exception $e) {
-            report($e);
             throw new TiteLiveApiCredentialsException('Could not login to titelive apis');
         }
     }
@@ -220,7 +219,6 @@ class TiteLiveClient implements BookDirectoryClient
                 return $res->json('token');
             });
         } catch (\Exception $e) {
-            report($e);
             if ($e instanceof RequestException) {
                 Log::error($e->response?->getBody());
             }
