@@ -238,7 +238,11 @@ class TiteLiveClient implements BookDirectoryClient
         }
 
         if ($param === static::CATEGORY_CODES) {
-            return str_pad(trim($value), 8, '0', STR_PAD_RIGHT);
+            return collect(explode(',', $value))
+                ->map(function ($code) {
+                    return str_pad(ltrim(trim($code), '0'), 7, '0', STR_PAD_RIGHT);
+                })
+                ->implode(',');
         }
 
         return (string) $value;

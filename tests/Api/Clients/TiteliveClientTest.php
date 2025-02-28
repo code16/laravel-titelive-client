@@ -55,7 +55,7 @@ it('lists books of a category', function () {
         return $request->hasHeader('User-Agent', 'qdb/v1.0')
             && $request['detail'] == 0
             && $request['tri'] == ''
-            && $request['codegtl'] == '12300000'
+            && $request['codegtl'] == '1230000'
             && $request['stocks'] == 1
             && $request['base'] == 'paper';
     });
