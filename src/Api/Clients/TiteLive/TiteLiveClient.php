@@ -20,9 +20,13 @@ class TiteLiveClient implements BookDirectoryClient
     use UsesBookModel;
 
     protected string $endpoint;
+
     protected string $login_endpoint;
+
     protected string $login;
+
     protected string $password;
+
     protected array $params = [];
 
     public function __construct(string $endpoint, string $login_endpoint, string $login, string $password)
