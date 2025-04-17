@@ -14,6 +14,9 @@ return [
                 'times' => env('TITELIVE_CLIENT_BOOK_DIRECTORY_API_RETRY_TIMES', 5),
                 'sleep_milliseconds' => env('TITELIVE_CLIENT_BOOK_DIRECTORY_API_RETRY_SLEEP_MILLISECONDS', 2000),
             ],
+            'params' => [
+                'code_support' => env('TITELIVE_CLIENT_API_PARAM_CODE_SUPPORT'),
+            ],
         ],
     ],
     'book_model_class' => \Code16\LaravelTiteliveClient\Models\Book::class,

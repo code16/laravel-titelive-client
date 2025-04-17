@@ -173,7 +173,7 @@ class TiteLiveClient implements BookDirectoryClient
     {
         $this->params['stocks'] = 1;
         $this->params['base'] = 'paper';
-        $this->params['code_support'] = 'T,P,BL';
+        $this->params['code_support'] = config('titelive-client.book_directory.api.params.code_support'); // 'T,P,BL';
 
         return '?'.http_build_query($this->params);
     }
@@ -255,12 +255,17 @@ class TiteLiveClient implements BookDirectoryClient
     private function makeOneBookFromTiteLiveResult(array $result): ?Book
     {
         $edition = collect($result['article'] ?? [])
-            ->when(isset($result['gencod']), function ($query) use ($result) {
-                return $query->where('gencod', $result['gencod']);
-            })
-            ->filter(function ($edition) {
-                return in_array($edition['codesupport'] ?? [], ['T', 'P', 'BL']);
-            })
+            ->when(isset($result['gencod']), fn ($query) => $query
+                ->where('gencod', $result['gencod'])
+            )
+            ->when(
+                config('titelive-client.book_directory.api.params.code_support'),
+                fn (Collection $collection, string $codes) => $collection
+                    ->filter(fn (array $edition) => in_array(
+                        $edition['codesupport'] ?? [],
+                        explode(',', $codes)
+                    ))
+            )
             ->first();
 
         if (! $edition) {
@@ -273,12 +278,15 @@ class TiteLiveClient implements BookDirectoryClient
     private function makeAllEditionsFromTiteLiveResult(array $result): Collection
     {
         return collect($result['article'])
-            ->filter(function ($edition) {
-                return in_array($edition['codesupport'] ?? [], ['T', 'P', 'BL']);
-            })
-            ->map(function ($edition) use ($result) {
-                return $this->mapBookFromApiResult($result, $edition);
-            });
+            ->when(
+                config('titelive-client.book_directory.api.params.code_support'),
+                fn (Collection $collection, string $codes) => $collection
+                    ->filter(fn (array $edition) => in_array(
+                        $edition['codesupport'] ?? [],
+                        explode(',', $codes)
+                    ))
+            )
+            ->map(fn ($edition) => $this->mapBookFromApiResult($result, $edition));
     }
 
     private function mapBookFromApiResult(array $book, array $edition): ?Book
@@ -314,10 +322,15 @@ class TiteLiveClient implements BookDirectoryClient
             'availability' => $edition['dispo'] ?? 4,
             'stock' => $edition['stock'] ?? 0,
             'editions' => collect($book['article'] ?? [])
-                ->filter(function ($otherEdition) use ($edition) {
-                    return in_array($otherEdition['codesupport'] ?? [], ['T', 'P', 'BL'])
-                        && $otherEdition['gencod'] != $edition['gencod'];
-                })
+                ->filter(fn (array $otherEdition) => $otherEdition['gencod'] != $edition['gencod'])
+                ->when(
+                    config('titelive-client.book_directory.api.params.code_support'),
+                    fn (Collection $collection, string $codes) => $collection
+                        ->filter(fn (array $edition) => in_array(
+                            $edition['codesupport'] ?? [],
+                            explode(',', $codes)
+                        ))
+                )
                 ->pluck('gencod')
                 ->values()
                 ->toArray(),

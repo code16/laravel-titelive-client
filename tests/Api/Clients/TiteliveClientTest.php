@@ -38,7 +38,30 @@ it('finds a book', function () {
 
     expect($result)
         ->toBeInstanceOf(Book::class)
-        ->and($result->price)->toEqual($this->doFindFixture['oeuvre']['article'][0]['prix'] * 100);
+        ->id->toEqual($this->doFindFixture['oeuvre']['article'][0]['gencod']);
+});
+
+it('doesn’t find a book on an unconfigured code_support', function () {
+    $client = new TiteLiveClient('find.example', 'login.example', 'login@example.org', 'pwd');
+
+    expect($client
+        ->setParam(BookDirectoryClient::GENCOD, '123')
+        ->doFind()
+    )->toBeInstanceOf(Book::class);
+
+    config()->set('titelive-client.book_directory.api.params.code_support', 'PS,BL');
+
+    expect($client
+        ->setParam(BookDirectoryClient::GENCOD, '123')
+        ->doFind()
+    )->toBeNull();
+
+    config()->set('titelive-client.book_directory.api.params.code_support', 'PS,BL,T');
+
+    expect($client
+        ->setParam(BookDirectoryClient::GENCOD, '123')
+        ->doFind()
+    )->toBeInstanceOf(Book::class);
 });
 
 it('lists books of a category', function () {
@@ -73,7 +96,7 @@ it('searches for books grouped by edition', function () {
         ->setParam(BookDirectoryClient::SEARCH_PAGE, 1)
         ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 10)
         ->setParam(BookDirectoryClient::SEARCH_QUERY, 'my search')
-        ->doSearch(true);
+        ->doSearch(groupEditions: true);
 
     Http::assertSent(function (Request $request) {
         return $request->hasHeader('User-Agent', 'qdb/v1.0')
@@ -91,9 +114,10 @@ it('searches for books grouped by edition', function () {
     // Check that the first book has all its editions gencod in ->editions
     $this->assertEqualsCanonicalizing(
         collect($this->doSearchFixture['result'][0]['article'])
-            ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P'])
-                && $edition['gencod'] != $this->doSearchFixture['result'][0]['gencod']
-            )
+//            ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P'])
+//                && $edition['gencod'] != $this->doSearchFixture['result'][0]['gencod']
+//            )
+            ->filter(fn ($edition) => $edition['gencod'] != $this->doSearchFixture['result'][0]['gencod'])
             ->pluck('gencod')
             ->values()
             ->toArray(),
@@ -107,22 +131,45 @@ it('searches for books NOT grouped by edition', function () {
     $searchResults = $client
         ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
         ->setParam(BookDirectoryClient::SEARCH_PAGE, 1)
-        ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 100)
+        ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 150)
+        ->setParam(BookDirectoryClient::SEARCH_QUERY, 'my search')
+        ->doSearch();
+
+    $editionCount = collect($this->doSearchFixture['result'])
+        ->sum(fn ($book) => collect($book['article'])->count());
+
+    expect($searchResults)
+        ->toBeInstanceOf(Collection::class)
+        ->count()->toEqual($editionCount);
+
+    collect($this->doSearchFixture['result'][0]['article'])
+        ->pluck('gencod')
+        ->values()
+        ->each(fn ($gencod, $index) => expect($searchResults[$index]->id)->toEqual($gencod));
+});
+
+it('filters search results on code_support when configured', function () {
+    $client = new TiteLiveClient('search.example', 'login.example', 'login@example.org', 'pwd');
+
+    config()->set('titelive-client.book_directory.api.params.code_support', 'T,P');
+
+    $searchResults = $client
+        ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
+        ->setParam(BookDirectoryClient::SEARCH_PAGE, 1)
+        ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 150)
         ->setParam(BookDirectoryClient::SEARCH_QUERY, 'my search')
         ->doSearch();
 
     $editionCount = collect($this->doSearchFixture['result'])
         ->sum(function ($book) {
             return collect($book['article'])
-                ->filter(function ($edition) {
-                    return in_array($edition['codesupport'], ['T', 'P']);
-                })
+                ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P']))
                 ->count();
         });
 
     expect($searchResults)
         ->toBeInstanceOf(Collection::class)
-        ->and($searchResults->count())->toEqual($editionCount);
+        ->count()->toEqual($editionCount);
 
     collect($this->doSearchFixture['result'][0]['article'])
         ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P']))
