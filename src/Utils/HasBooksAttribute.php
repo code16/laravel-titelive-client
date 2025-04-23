@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
 
 /**
- * @property Collection|Book[] $books
+ * @property Collection|Book[]|\App\Models\Book[] $books
  *
  * @mixin \Illuminate\Database\Eloquent\Model
  */
