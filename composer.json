@@ -10,14 +10,15 @@
     "require": {
         "php": "^8.2|^8.3",
         "ext-intl": "*",
+        "code16/pint-config": "^1.2.1",
         "guzzlehttp/guzzle": "^7.7",
-        "illuminate/contracts": "^10.0|^11.0",
+        "illuminate/contracts": "^10.0|^11.0|^12.0",
         "spatie/laravel-package-tools": "^1.14.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
-        "nunomaduro/collision": "^7.8",
-        "orchestra/testbench": "^8.8|^9.0",
+        "nunomaduro/collision": "^8.0",
+        "orchestra/testbench": "^8.8|^9.0|^10.0",
         "pestphp/pest": "^2.0",
         "pestphp/pest-plugin-arch": "^2.0",
         "pestphp/pest-plugin-laravel": "^2.0",
@@ -35,7 +36,10 @@
         }
     },
     "scripts": {
-        "post-autoload-dump": "@composer run prepare",
+        "post-autoload-dump": [
+            "@php vendor/bin/pint-config install",
+            "@composer run prepare"
+        ],
         "clear": "@php vendor/bin/testbench package:purge-laravel-titelive-client --ansi",
         "prepare": "@php vendor/bin/testbench package:discover --ansi",
         "build": [
