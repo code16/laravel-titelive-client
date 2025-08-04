@@ -22,7 +22,7 @@ class BookJsonResource extends JsonResource
             'formatted_published_date' => $this->published_date
                 ? $this->published_date->isoFormat('Do MMMM YYYY')
                 : null,
-            'availability_label' => $this->availability_label,
+            'publisher_availability_label' => $this->publisher_availability_label,
             'short_details' => $this->short_details,
             'orderable' => $this->canBeOrdered(),
             'url' => $this->url,

@@ -22,14 +22,14 @@ class Book extends Model implements JsonSerializable
     protected $casts = [
         'id' => 'string',
         'published_date' => 'date',
-        'availability' => BookAvailability::class,
+        'publisher_availability' => BookAvailability::class,
     ];
 
     protected static ?string $fallbackVisualUrl = null;
 
     protected static function newFactory()
     {
-        return new BookFactory;
+        return new BookFactory();
     }
 
     protected function url(): Attribute
@@ -59,14 +59,19 @@ class Book extends Model implements JsonSerializable
         return $this->stock > 0;
     }
 
+    public function available(): Attribute
+    {
+        return Attribute::make(get: fn () => $this->canBeOrdered());
+    }
+
     public function canBeOrdered(): bool
     {
         if (config('titelive-client.shopping_closed')) {
             return false;
         }
 
-        return $this->availability != BookAvailability::Forthcoming
-            && ($this->hasStock() || $this->availability == BookAvailability::AvailableOnDemand);
+        return $this->publisher_availability != BookAvailability::Forthcoming
+            && ($this->hasStock() || $this->publisher_availability == BookAvailability::AvailableOnDemand);
     }
 
     public function visual(string $size, ?string $fallbackUrl = null): ?string

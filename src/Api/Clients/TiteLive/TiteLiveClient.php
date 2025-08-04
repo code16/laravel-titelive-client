@@ -268,7 +268,7 @@ class TiteLiveClient implements BookDirectoryClient
             )
             ->first();
 
-        if (! $edition) {
+        if (!$edition) {
             return null;
         }
 
@@ -291,7 +291,7 @@ class TiteLiveClient implements BookDirectoryClient
 
     private function mapBookFromApiResult(array $book, array $edition): ?Book
     {
-        if (! isset($edition['prix'])) {
+        if (!isset($edition['prix'])) {
             return null;
         }
 
@@ -319,7 +319,7 @@ class TiteLiveClient implements BookDirectoryClient
                 'large' => $edition['imagesUrl']['recto'] ?? null,
                 'medium' => $edition['imagesUrl']['moyen'] ?? null,
             ],
-            'availability' => $edition['dispo'] ?? 4,
+            'publisher_availability' => $edition['dispo'] ?? 4,
             'stock' => $edition['stock'] ?? 0,
             'editions' => collect($book['article'] ?? [])
                 ->filter(fn (array $otherEdition) => $otherEdition['gencod'] != $edition['gencod'])

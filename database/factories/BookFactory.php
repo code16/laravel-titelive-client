@@ -101,7 +101,7 @@ class BookFactory extends Factory
                 'thumbnail' => $this->getVisual('S'),
                 'medium' => $this->getVisual('M'),
             ],
-            'availability' => $this->faker->numberBetween(1, 8),
+            'publisher_availability' => $this->faker->numberBetween(1, 8),
             'stock' => $this->faker->numberBetween(0, 5),
             'editions' => $this->faker->randomElements(
                 [$this->faker->ean13, $this->faker->ean13, $this->faker->ean13, $this->faker->ean13],
