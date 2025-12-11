@@ -83,7 +83,7 @@ class TiteLiveClient implements BookDirectoryClient
             return $this->makeOneBookFromTiteLiveResult($this->requestApi('ean/'.$gencod)['oeuvre'] ?? []);
         }
 
-        throw new TiteLiveBookNotFoundException('Missing gencod parameter');
+        throw new TiteLiveMissingParameterException('Missing gencod parameter');
     }
 
     public function doListForAuthors(): Collection
@@ -91,7 +91,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['detail'] = 0;
         $this->params['tri'] = '';
 
-        return collect($this->requestApi('search')['result'])
+        return collect($this->requestApi('search')['result'] ?? [])
             ->map(function ($result) {
                 return $this->makeOneBookFromTiteLiveResult($result);
             })
@@ -103,7 +103,7 @@ class TiteLiveClient implements BookDirectoryClient
         $this->params['detail'] = 0;
         $this->params['tri'] = '';
 
-        return collect($this->requestApi('search')['result'])
+        return collect($this->requestApi('search')['result'] ?? [])
             ->map(function ($result) {
                 return $this->makeAllEditionsFromTiteLiveResult($result);
             })
@@ -147,7 +147,7 @@ class TiteLiveClient implements BookDirectoryClient
                 if ($error['type'] === 'urn:epagine:GEN-404') {
                     throw new TiteLiveBookNotFoundException($error['ean'] ?? '');
                 }
-                throw new TiteLiveBookNotFoundException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
+                throw new TiteLiveApiException('Erreur : '.($error['title'] ?? '').' ('.($error['detail'] ?? ')'));
             }
 
             if ($e instanceof TiteLiveApiCredentialsException) {
@@ -163,7 +163,7 @@ class TiteLiveClient implements BookDirectoryClient
             }
 
             report($e);
-            throw new TiteLiveBookNotFoundException('Unable to fetch data from titelive apis');
+            throw new TiteLiveApiException('Unable to fetch data from titelive apis');
         }
 
         return $response->json() ?? [];
