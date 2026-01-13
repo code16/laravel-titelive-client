@@ -25,6 +25,10 @@ jobs:
             env:
               LARAVEL: 12.*
               TESTBENCH: 10.*
+          - php: 8.5
+            env:
+              LARAVEL: 12.*
+              TESTBENCH: 10.*
     env: ${{ matrix.env }}
     name: P${{ matrix.php }} - L${{ matrix.env.LARAVEL }} - TB${{ matrix.env.TESTBENCH }}
 
@@ -36,7 +40,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv, imagick, fileinfo, xdebug
           coverage: none
 
       - name: Setup problem matchers
@@ -52,5 +56,10 @@ jobs:
       - name: List Installed Dependencies
         run: composer show -D
 
+      - name: Run Security Audit
+        run: composer audit
+
       - name: Execute tests
-        run: vendor/bin/pest --ci
+        env:
+          XDEBUG_MODE: coverage
+        run: vendor/bin/pest --ci --no-coverage
