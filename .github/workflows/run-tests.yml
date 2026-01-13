@@ -62,4 +62,4 @@ jobs:
       - name: Execute tests
         env:
           XDEBUG_MODE: coverage
-        run: vendor/bin/pest --ci
+        run: vendor/bin/pest --ci --no-coverage
