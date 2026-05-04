@@ -2,6 +2,7 @@
 
 namespace Code16\LaravelTiteliveClient\Database\Factories;
 
+use Code16\LaravelTiteliveClient\Enum\BookAvailability;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
@@ -101,7 +102,7 @@ class BookFactory extends Factory
                 'thumbnail' => $this->getVisual('S'),
                 'medium' => $this->getVisual('M'),
             ],
-            'publisher_availability' => $this->faker->numberBetween(1, 8),
+            'publisher_availability' => $this->faker->randomElement(BookAvailability::cases()),
             'stock' => $this->faker->numberBetween(0, 5),
             'editions' => $this->faker->randomElements(
                 [$this->faker->ean13, $this->faker->ean13, $this->faker->ean13, $this->faker->ean13],

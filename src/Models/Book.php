@@ -59,9 +59,22 @@ class Book extends Model implements JsonSerializable
         return $this->stock > 0;
     }
 
-    public function available(): Attribute
+    protected function available(): Attribute
     {
         return Attribute::make(get: fn () => $this->canBeOrdered());
+    }
+
+    public function availabilityLabel(): string
+    {
+        if (config('titelive-client.shopping_closed')) {
+            return 'Indisponible';
+        }
+
+        if ($this->hasStock()) {
+            return 'En stock';
+        }
+
+        return $this->publisher_availability?->getLabel() ?? 'Indisponible';
     }
 
     public function canBeOrdered(): bool
