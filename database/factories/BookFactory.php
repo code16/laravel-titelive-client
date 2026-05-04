@@ -2,15 +2,10 @@
 
 namespace Code16\LaravelTiteliveClient\Database\Factories;
 
-use Code16\LaravelTiteliveClient\Book;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BookFactory extends Factory
 {
-    protected $model = Book::class;
-
-    private static int $VISUAL_INDEX = 0;
-
     private static array $VISUALS = [
         '229/9782070585229',
         '904/9782070624904',
@@ -75,6 +70,11 @@ class BookFactory extends Factory
         '613/9782075150613',
     ];
 
+    public function modelName()
+    {
+        return config('titelive-client.book_model_class');
+    }
+
     public function definition()
     {
         return [
@@ -101,7 +101,7 @@ class BookFactory extends Factory
                 'thumbnail' => $this->getVisual('S'),
                 'medium' => $this->getVisual('M'),
             ],
-            'availability' => $this->faker->numberBetween(1, 8),
+            'publisher_availability' => $this->faker->numberBetween(1, 8),
             'stock' => $this->faker->numberBetween(0, 5),
             'editions' => $this->faker->randomElements(
                 [$this->faker->ean13, $this->faker->ean13, $this->faker->ean13, $this->faker->ean13],
@@ -113,16 +113,10 @@ class BookFactory extends Factory
 
     private function getVisual(string $size = 'L'): string
     {
-        $visual = sprintf(
+        return sprintf(
             'https://images.epagine.fr/%s_1_%s.jpg',
-            self::$VISUALS[self::$VISUAL_INDEX],
+            self::$VISUALS[array_rand(self::$VISUALS)],
             ['S' => 'v', 'M' => 'm', 'L' => '75'][$size] ?? '75'
         );
-
-        if (++self::$VISUAL_INDEX >= count(self::$VISUALS)) {
-            self::$VISUAL_INDEX = 0;
-        }
-
-        return $visual;
     }
 }

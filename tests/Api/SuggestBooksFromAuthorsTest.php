@@ -3,11 +3,11 @@
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryMockClientForDev;
 use Code16\LaravelTiteliveClient\Api\SuggestBooksFromAuthors;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 it('suggests books from authors', function () {
-    $fakeClient = new BookDirectoryMockClientForDev;
+    $fakeClient = new BookDirectoryMockClientForDev();
     $this->app->bind(BookDirectoryClient::class, fn () => $fakeClient);
 
     app(SuggestBooksFromAuthors::class)->suggestBooks(['bob marley', 'doc gyneco']);

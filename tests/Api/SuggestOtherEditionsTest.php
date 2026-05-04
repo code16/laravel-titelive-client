@@ -3,13 +3,14 @@
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryMockClientForDev;
 use Code16\LaravelTiteliveClient\Api\SuggestOtherEditions;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
-beforeEach(function () {});
+beforeEach(function () {
+});
 
 it('suggests other editions of a book', function () {
-    $fakeClient = new BookDirectoryMockClientForDev;
+    $fakeClient = new BookDirectoryMockClientForDev();
     $this->app->bind(BookDirectoryClient::class, fn () => $fakeClient);
 
     app(SuggestOtherEditions::class)->suggestBooks('How to make $$', ['bob marley', 'doc gyneco']);

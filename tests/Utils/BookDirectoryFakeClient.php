@@ -3,7 +3,7 @@
 namespace Code16\LaravelTiteliveClient\Tests\Utils;
 
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 class BookDirectoryFakeClient implements BookDirectoryClient

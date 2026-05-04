@@ -12,6 +12,7 @@ enum BookAvailability: int
     case OutOfPrint = 6;
     case Missing = 7;
     case ToBePublishedAgain = 8;
+    case Discontinued = 9;
 
     public function getLabel(): string
     {
@@ -24,6 +25,7 @@ enum BookAvailability: int
             BookAvailability::Missing,
             BookAvailability::CommercialChange => 'Indisponible',
             BookAvailability::OutOfPrint => 'Épuisé',
+            BookAvailability::Discontinued => 'Abandon de parution',
         };
     }
 }

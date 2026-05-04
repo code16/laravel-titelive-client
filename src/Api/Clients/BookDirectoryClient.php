@@ -2,7 +2,7 @@
 
 namespace Code16\LaravelTiteliveClient\Api\Clients;
 
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Support\Collection;
 
 interface BookDirectoryClient

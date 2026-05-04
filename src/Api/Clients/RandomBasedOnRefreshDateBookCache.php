@@ -4,7 +4,7 @@ namespace Code16\LaravelTiteliveClient\Api\Clients;
 
 use Carbon\Carbon;
 use Code16\LaravelTiteliveClient\Api\FindBook;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 
 /**
  * This cache strategy is based on a simple rule:

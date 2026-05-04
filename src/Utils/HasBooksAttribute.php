@@ -3,25 +3,35 @@
 namespace Code16\LaravelTiteliveClient\Utils;
 
 use Code16\LaravelTiteliveClient\Api\Clients\BookCache;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Api\Clients\TiteLive\TiteLiveBookNotFoundException;
+use Code16\LaravelTiteliveClient\Concerns\UsesBookModel;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Collection;
 
 /**
- * @property Collection|Book[] $books
+ * @property Collection|Book[]|\App\Models\Book[] $books
  *
  * @mixin \Illuminate\Database\Eloquent\Model
  */
 trait HasBooksAttribute
 {
+    use UsesBookModel;
+
     public function refreshBooks(bool $force = false): self
     {
         $this->update([
             'books' => $this->books
                 ->map(function (Book $book) use ($force) {
-                    return app(BookCache::class)
-                        ->force($force)
-                        ->refreshIfNeeded($book);
+                    try {
+                        $refreshedBook = app(BookCache::class)
+                            ->force($force)
+                            ->refreshIfNeeded($book);
+                    } catch (TiteLiveBookNotFoundException $e) {
+                        return null;
+                    }
+
+                    return $refreshedBook;
                 })
                 ->filter()
                 ->values()
@@ -36,7 +46,7 @@ trait HasBooksAttribute
         return Attribute::make(
             get: fn () => collect($this->fromJson($this->attributes['books'] ?? '[]'))
                 ->whereNotNull()
-                ->map(fn ($attributes) => new Book($attributes))
+                ->map(fn ($attributes) => static::bookModelClass()::make($attributes))
                 ->values()
         );
     }

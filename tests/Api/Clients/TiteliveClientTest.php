@@ -2,7 +2,7 @@
 
 use Code16\LaravelTiteliveClient\Api\Clients\BookDirectoryClient;
 use Code16\LaravelTiteliveClient\Api\Clients\TiteLive\TiteLiveClient;
-use Code16\LaravelTiteliveClient\Book;
+use Code16\LaravelTiteliveClient\Models\Book;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
@@ -12,16 +12,17 @@ beforeEach(function () {
     $this->doFindFixture = include __DIR__.'/../../fixtures/fixture_doFind.php';
 
     Http::fake([
-        'find?*' => Http::response($this->doFindFixture),
-        'list?*' => Http::response($this->doSearchFixture),
-        'search?*' => Http::response($this->doSearchFixture),
+        'find.example/*' => Http::response($this->doFindFixture),
+        'list.example/*' => Http::response($this->doSearchFixture),
+        'search.example/*' => Http::response($this->doSearchFixture),
+        'login.example/*' => Http::response(['token' => 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWQiOjgwMSwiaWF0IjoxNTE2MjM5MDIyfQ.KLNk_-7Dq8g9nUz_WRQr72Bc0iz9xMXJ165r82A83v4'], 200, ['Set-Cookie' => 'refresh-token=123456789; domain=.']),
     ]);
 
     $this->withoutExceptionHandling();
 });
 
 it('finds a book', function () {
-    $client = new TiteLiveClient('/find', 'client_number', 'login', 'pwd');
+    $client = new TiteLiveClient('find.example', 'login.example', 'login@example.org', 'pwd');
 
     $result = $client
         ->setParam(BookDirectoryClient::GENCOD, '123')
@@ -29,9 +30,7 @@ it('finds a book', function () {
 
     Http::assertSent(function (Request $request) {
         return $request->hasHeader('User-Agent', 'qdb/v1.0')
-            && $request['ean'] == '123'
-            && $request['mid'] == 'client_number'
-            && $request['login'] == 'login'
+            && str_contains($request->url(), '123')
             && $request['stocks'] == 1
             && $request['detail'] == 1
             && $request['base'] == 'paper';
@@ -39,11 +38,34 @@ it('finds a book', function () {
 
     expect($result)
         ->toBeInstanceOf(Book::class)
-        ->and($result->price)->toEqual($this->doFindFixture['oeuvre']['article'][0]['prix'] * 100);
+        ->id->toEqual($this->doFindFixture['oeuvre']['article'][0]['gencod']);
+});
+
+it('doesn’t find a book on an unconfigured code_support', function () {
+    $client = new TiteLiveClient('find.example', 'login.example', 'login@example.org', 'pwd');
+
+    expect($client
+        ->setParam(BookDirectoryClient::GENCOD, '123')
+        ->doFind()
+    )->toBeInstanceOf(Book::class);
+
+    config()->set('titelive-client.book_directory.api.params.code_support', 'PS,BL');
+
+    expect($client
+        ->setParam(BookDirectoryClient::GENCOD, '123')
+        ->doFind()
+    )->toBeNull();
+
+    config()->set('titelive-client.book_directory.api.params.code_support', 'PS,BL,T');
+
+    expect($client
+        ->setParam(BookDirectoryClient::GENCOD, '123')
+        ->doFind()
+    )->toBeInstanceOf(Book::class);
 });
 
 it('lists books of a category', function () {
-    $client = new TiteLiveClient('/list', 'client_number', 'login', 'pwd');
+    $client = new TiteLiveClient('list.example', 'login.example', 'login@example.org', 'pwd');
 
     $searchResults = $client
         ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
@@ -56,9 +78,7 @@ it('lists books of a category', function () {
         return $request->hasHeader('User-Agent', 'qdb/v1.0')
             && $request['detail'] == 0
             && $request['tri'] == ''
-            && $request['codegtl'] == '12300000'
-            && $request['mid'] == 'client_number'
-            && $request['login'] == 'login'
+            && $request['codegtl'] == '1230000'
             && $request['stocks'] == 1
             && $request['base'] == 'paper';
     });
@@ -69,22 +89,20 @@ it('lists books of a category', function () {
 });
 
 it('searches for books grouped by edition', function () {
-    $client = new TiteLiveClient('/search', 'client_number', 'login', 'pwd');
+    $client = new TiteLiveClient('search.example', 'login.example', 'login@example.org', 'pwd');
 
     $searchResults = $client
         ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
         ->setParam(BookDirectoryClient::SEARCH_PAGE, 1)
         ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 10)
         ->setParam(BookDirectoryClient::SEARCH_QUERY, 'my search')
-        ->doSearch(true);
+        ->doSearch(groupEditions: true);
 
     Http::assertSent(function (Request $request) {
         return $request->hasHeader('User-Agent', 'qdb/v1.0')
             && $request['detail'] == 0
             && $request['tri'] == ''
             && $request['mots'] == 'my search'
-            && $request['mid'] == 'client_number'
-            && $request['login'] == 'login'
             && $request['stocks'] == 1
             && $request['base'] == 'paper';
     });
@@ -96,9 +114,10 @@ it('searches for books grouped by edition', function () {
     // Check that the first book has all its editions gencod in ->editions
     $this->assertEqualsCanonicalizing(
         collect($this->doSearchFixture['result'][0]['article'])
-            ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P'])
-                    && $edition['gencod'] != $this->doSearchFixture['result'][0]['gencod']
-            )
+//            ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P'])
+//                && $edition['gencod'] != $this->doSearchFixture['result'][0]['gencod']
+//            )
+            ->filter(fn ($edition) => $edition['gencod'] != $this->doSearchFixture['result'][0]['gencod'])
             ->pluck('gencod')
             ->values()
             ->toArray(),
@@ -107,27 +126,50 @@ it('searches for books grouped by edition', function () {
 });
 
 it('searches for books NOT grouped by edition', function () {
-    $client = new TiteLiveClient('/search', 'client_number', 'login', 'pwd');
+    $client = new TiteLiveClient('search.example', 'login.example', 'login@example.org', 'pwd');
 
     $searchResults = $client
         ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
         ->setParam(BookDirectoryClient::SEARCH_PAGE, 1)
-        ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 100)
+        ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 150)
+        ->setParam(BookDirectoryClient::SEARCH_QUERY, 'my search')
+        ->doSearch();
+
+    $editionCount = collect($this->doSearchFixture['result'])
+        ->sum(fn ($book) => collect($book['article'])->count());
+
+    expect($searchResults)
+        ->toBeInstanceOf(Collection::class)
+        ->count()->toEqual($editionCount);
+
+    collect($this->doSearchFixture['result'][0]['article'])
+        ->pluck('gencod')
+        ->values()
+        ->each(fn ($gencod, $index) => expect($searchResults[$index]->id)->toEqual($gencod));
+});
+
+it('filters search results on code_support when configured', function () {
+    $client = new TiteLiveClient('search.example', 'login.example', 'login@example.org', 'pwd');
+
+    config()->set('titelive-client.book_directory.api.params.code_support', 'T,P');
+
+    $searchResults = $client
+        ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
+        ->setParam(BookDirectoryClient::SEARCH_PAGE, 1)
+        ->setParam(BookDirectoryClient::SEARCH_TOTAL_COUNT, 150)
         ->setParam(BookDirectoryClient::SEARCH_QUERY, 'my search')
         ->doSearch();
 
     $editionCount = collect($this->doSearchFixture['result'])
         ->sum(function ($book) {
             return collect($book['article'])
-                ->filter(function ($edition) {
-                    return in_array($edition['codesupport'], ['T', 'P']);
-                })
+                ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P']))
                 ->count();
         });
 
     expect($searchResults)
         ->toBeInstanceOf(Collection::class)
-        ->and($searchResults->count())->toEqual($editionCount);
+        ->count()->toEqual($editionCount);
 
     collect($this->doSearchFixture['result'][0]['article'])
         ->filter(fn ($edition) => in_array($edition['codesupport'], ['T', 'P']))
@@ -137,7 +179,7 @@ it('searches for books NOT grouped by edition', function () {
 });
 
 it('removes diacritics and accents from the search query', function () {
-    $client = new TiteLiveClient('/search', 'client_number', 'login', 'pwd');
+    $client = new TiteLiveClient('search.example', 'login.example', 'login@example.org', 'pwd');
 
     $client
         ->setParam(BookDirectoryClient::SEARCH_AVAILABILITY, 'all')
@@ -146,5 +188,11 @@ it('removes diacritics and accents from the search query', function () {
         ->setParam(BookDirectoryClient::SEARCH_QUERY, 'àéçè/ô-ûî+öüï')
         ->doSearch();
 
-    Http::assertSent(fn (Request $request) => $request['mots'] == 'aece o ui oui');
+    Http::assertSent(function (Request $request) {
+        if (str_contains($request->url(), 'search.example')) {
+            return $request['mots'] == 'aece o ui oui';
+        } else {
+            return str_contains($request->url(), 'login.example');
+        }
+    });
 });
